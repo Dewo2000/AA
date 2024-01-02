@@ -37,3 +37,25 @@ def ExportAllformatsMLPSKlearn(mlp,X,picklefileName,onixFileName,jsonFileName,cu
     with open(customFileName, 'w') as f:
         f.write(customFormat)
         
+def zscore_normalize_features(X):
+    """
+    computes  X, zcore normalized by column
+
+    Args:
+      X (ndarray (m,n))     : input data, m examples, n features
+
+    Returns:
+      X_norm (ndarray (m,n)): input normalized by column
+      mu (ndarray (n,))     : mean of each feature
+      sigma (ndarray (n,))  : standard deviation of each feature
+    """
+    
+    np.array(X)
+    m = X.shape[0] # numero filas (ejemplos)
+    sumX = np.sum(X, axis=0) # La suma de los elementos de cada columna
+    mu = sumX / m # Media X por columnas (tamaño n)
+
+    sigma = X.std(axis=0) # Desviacion tipica por columnas (tamaño n)
+    X_norm = (X-mu)/sigma
+
+    return (X_norm, mu, sigma)
