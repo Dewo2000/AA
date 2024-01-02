@@ -8,15 +8,26 @@ def sigmoid_deriv(z):
 	return sigmoid(z)*(1-sigmoid(z))
 
 def feedforward(thetas, X):
-    m = X.shape[0]
-    a = [np.array(X)]
+    m = 3
+    a = []
     z = []
 
-    for theta in thetas:
-        a[-1] = np.hstack([np.ones((m, 1)), a[-1]])
-        z.append(np.dot(a[-1], theta.T))
-        a.append(sigmoid(z[-1]))
+    a1= np.array(X)
+    a1 = np.hstack([np.ones((a1.shape[0], 1)), a1])
+    a.append(a1)
 
+    for i in thetas:
+        z2 = np.dot(a1, thetas[i].T)
+        a2 = sigmoid(z2)
+        a2 = np.hstack([np.ones((a2.shape[0], 1)), a2])
+        z.append(z2)
+        a.append(a2)
+        a1=a2
+        
+    z3 = np.dot(a2, thetas[m-1].T)
+    a3 = sigmoid(z3)
+    z.append(z3)
+    a.append(a3)
     return a, z
 
 def L2(thetas, y, lambda_):
@@ -57,8 +68,8 @@ def backprop(neuronas_por_capas,thetas, X, y, lambda_):
 
 def gradientDescentTraining(neuronas_por_capas, X, y, lambda_, alpha, num_iters):
     e = 0.12
-    for i in range(len(neuronas_por_capas)-1):
-        thetas = [np.random.uniform(-e, e, size=(neuronas_por_capas[i + 1], neuronas_por_capas[i] + 1))]
+    thetas = [np.random.uniform(-e, e, size=(neuronas_por_capas[i + 1], neuronas_por_capas[i] + 1))
+              for i in range(len(neuronas_por_capas)-1)]#
 
     for it in range(num_iters):
         J, grads = backprop(neuronas_por_capas,thetas, X, y, lambda_)
