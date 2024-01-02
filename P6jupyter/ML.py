@@ -21,28 +21,30 @@ def feedforward(thetas, X):
 
 def L2(thetas, y, lambda_):
     m = len(y)
-    regularization_term = (lambda_ / (2 * m)) * sum([np.sum(theta[:, 1:]**2) for theta in thetas])
+    regularization_term = (lambda_/(2*m))*np.sum(np.sum(np.sum(thetas**2)))
     return regularization_term
 
-def cost_reg(thetas, X, y, lambda_):
-    a, _ = feedforward(thetas, X)
+def cost_reg(neuronas_por_capas,thetas, X, y, lambda_):
+    J = cost(thetas,X,y)
     m = len(X)
-    J = cost(a[-1], y) + L2(thetas, y, lambda_)
-    return J
+    thetas = np.concatenate([theta[:,1:].flatten() for theta in thetas])
+    Jr = J+L2(thetas,y,lambda_)
+    return Jr
 
-def cost(a, y):
+def cost(thetas,X, y):
+    a, z = feedforward(thetas, X)
     m = len(y)
     t1 = np.sum(y * np.log(a))
     t2 = np.sum((1 - y) * np.log(1 - a))
     J = (-1 / m) * np.sum(t1 + t2)
     return J
 
-def backprop(thetas, X, y, lambda_):
+def backprop(neuronas_por_capas,thetas, X, y, lambda_):
     a, z = feedforward(thetas, X)
     m = len(X)
     deltas = [a[-1] - y]
 
-    for i in range(len(thetas)-1, 0, -1):
+    for i in range(len(neuronas_por_capas)-1, 0, -1):
         delta = np.dot(deltas[0], thetas[i][:, 1:]) * sigmoid_deriv(z[i-1])
         deltas.insert(0, delta)
 
@@ -53,20 +55,20 @@ def backprop(thetas, X, y, lambda_):
 
     return J, grads
 
-def gradientDescentTraining(thetas, X, y, lambda_, alpha, num_iters):
+def gradientDescentTraining(neuronas_por_capas, X, y, lambda_, alpha, num_iters):
     e = 0.12
-    for i in range(len(thetas)):
-        thetas[i] = np.random.uniform(-e, e, size=thetas[i].shape)
+    for i in range(len(neuronas_por_capas)-1):
+        thetas = [np.random.uniform(-e, e, size=(neuronas_por_capas[i + 1], neuronas_por_capas[i] + 1))]
 
-    for _ in range(num_iters):
-        J, grads = backprop(thetas, X, y, lambda_)
-        thetas = [theta - alpha * grad for theta, grad in zip(thetas, grads)]
+    for it in range(num_iters):
+        J, grads = backprop(neuronas_por_capas,thetas, X, y, lambda_)
+        thetas = thetas - (alpha*grads)
 
     return thetas
 
 def predict(thetas, X):
     m = X.shape[0]
-    a, _ = feedforward(thetas, X)
+    a, z = feedforward(thetas, X)
     p = np.argmax(a[-1], axis=1)
 
     return p
