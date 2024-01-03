@@ -16,7 +16,7 @@ def feedforward(thetas, X):
     a1 = np.hstack([np.ones((a1.shape[0], 1)), a1])
     a.append(a1)
 
-    for i in thetas:
+    for i in range(m-2):
         z2 = np.dot(a1, thetas[i].T)
         a2 = sigmoid(z2)
         a2 = np.hstack([np.ones((a2.shape[0], 1)), a2])
@@ -24,7 +24,7 @@ def feedforward(thetas, X):
         a.append(a2)
         a1=a2
         
-    z3 = np.dot(a2, thetas[m-1].T)
+    z3 = np.dot(a2, thetas[m-2].T)
     a3 = sigmoid(z3)
     z.append(z3)
     a.append(a3)
@@ -35,7 +35,7 @@ def L2(thetas, y, lambda_):
     regularization_term = (lambda_/(2*m))*np.sum(np.sum(np.sum(thetas**2)))
     return regularization_term
 
-def cost_reg(neuronas_por_capas,thetas, X, y, lambda_):
+def cost_reg(thetas, X, y, lambda_):
     J = cost(thetas,X,y)
     m = len(X)
     thetas = np.concatenate([theta[:,1:].flatten() for theta in thetas])
@@ -45,8 +45,8 @@ def cost_reg(neuronas_por_capas,thetas, X, y, lambda_):
 def cost(thetas,X, y):
     a, z = feedforward(thetas, X)
     m = len(y)
-    t1 = np.sum(y * np.log(a))
-    t2 = np.sum((1 - y) * np.log(1 - a))
+    t1 = np.sum(y * np.log(a[-1]))
+    t2 = np.sum((1 - y) * np.log(1 - a[-1]))
     J = (-1 / m) * np.sum(t1 + t2)
     return J
 
@@ -55,7 +55,7 @@ def backprop(neuronas_por_capas,thetas, X, y, lambda_):
     m = len(X)
     deltas = [a[-1] - y]
 
-    for i in range(len(neuronas_por_capas)-1, 0, -1):
+    for i in range(len(neuronas_por_capas)-2, 0, -1):
         delta = np.dot(deltas[0], thetas[i][:, 1:]) * sigmoid_deriv(z[i-1])
         deltas.insert(0, delta)
 
@@ -69,11 +69,12 @@ def backprop(neuronas_por_capas,thetas, X, y, lambda_):
 def gradientDescentTraining(neuronas_por_capas, X, y, lambda_, alpha, num_iters):
     e = 0.12
     thetas = [np.random.uniform(-e, e, size=(neuronas_por_capas[i + 1], neuronas_por_capas[i] + 1))
-              for i in range(len(neuronas_por_capas)-1)]#
+              for i in range(len(neuronas_por_capas)-1)]
 
     for it in range(num_iters):
         J, grads = backprop(neuronas_por_capas,thetas, X, y, lambda_)
-        thetas = thetas - (alpha*grads)
+        for i in range(len(thetas)):
+            thetas[i] =thetas[i] - alpha * grads[i]
 
     return thetas
 
