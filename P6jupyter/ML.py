@@ -8,7 +8,7 @@ def sigmoid_deriv(z):
 	return sigmoid(z)*(1-sigmoid(z))
 
 def feedforward(thetas, X):
-    m = 3
+    m = len(thetas)+1
     a = []
     z = []
 
